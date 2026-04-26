@@ -580,14 +580,14 @@
         const statusDiv = document.getElementById('loadStatus');
         if (failedCount > 0) {
             statusDiv.style.display = 'block';
-            statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> تم تحميل ${loadedCount} من ${total} ملف. ${failedCount} ملف فشل (تحقق من وجود الملفات في مسار "geojson/")`;
+            
         } else if (loadedCount === total) {
             statusDiv.style.display = 'block';
             statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> تم تحميل جميع ملفات البيانات بنجاح (${total}) - اضغط على أي عنصر لرؤية التفاصيل`;
             setTimeout(() => statusDiv.style.opacity = '0.7', 4000);
         } else {
             statusDiv.style.display = 'block';
-            statusDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> جاري تحميل البيانات... ${loadedCount}/${total}`;
+            
         }
     }
 
