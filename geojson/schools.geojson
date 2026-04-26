@@ -1,0 +1,16 @@
+{
+"type": "FeatureCollection",
+"name": "schools",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Number": 1, "x": 31.866391208240302, "y": 31.41437047618, "name": "Shata Technical School for Advanced", "rate": 3.6, "address": "Madinet Izbat Al Borg, Damietta, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.866391208240302, 31.41437047618 ] } },
+{ "type": "Feature", "properties": { "Number": 2, "x": 31.863385347763501, "y": 31.414601780301702, "name": "Shata Joint Preparatory School", "rate": null, "address": " Madinet Izbat Al Borg, Damietta, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.863385347763501, 31.414601780301702 ] } },
+{ "type": "Feature", "properties": { "Number": 3, "x": 31.873745500092301, "y": 31.409984901902, "name": "مدرسة شطا الجديدة الابتدائية", "rate": null, "address": " Madinet Izbat Al Borg, Damietta Desert, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.873745500092301, 31.409984901902 ] } },
+{ "type": "Feature", "properties": { "Number": 4, "x": 31.795993597320599, "y": 31.423925606817001, "name": "Shata El-Ezaby Elementary School", "rate": null, "address": " Qism Damietta, Dameitta Second, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.795993597320599, 31.423925606817001 ] } },
+{ "type": "Feature", "properties": { "Number": 5, "x": 31.8146188568792, "y": 31.419237990714102, "name": "Shata Preparatory School", "rate": 1.5, "address": "Qism Damietta, Damietta, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.8146188568792, 31.419237990714102 ] } },
+{ "type": "Feature", "properties": { "Number": 6, "x": 31.8644414616864, "y": 31.4145145248721, "name": "مدرسة شطا الابتدائيه رقم3", "rate": null, "address": "Madinet Izbat Al Borg, Damietta, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.8644414616864, 31.4145145248721 ] } },
+{ "type": "Feature", "properties": { "Number": 7, "x": 31.8658147527137, "y": 31.413489025981502, "name": "مدرسة شطا الابتدائية رقم2", "rate": null, "address": " بجوار مركز شباب، طريق الإسماعيليه - بورسعيد, Madinet Izbat Al Borg, Damietta Desert, Damietta Governorate" }, "geometry": { "type": "Point", "coordinates": [ 31.8658147527137, 31.413489025981502 ] } },
+{ "type": "Feature", "properties": { "Number": 8, "x": 29.9899196616864, "y": 31.262142438876399, "name": "Lara's house Nursery", "rate": 4.3, "address": "31 Walid Salah Al Din Shata, Sidi Beshr Qebli, Montaza 2, Alexandria Governorate " }, "geometry": { "type": "Point", "coordinates": [ 29.9899196616864, 31.262142438876399 ] } },
+{ "type": "Feature", "properties": { "Number": 9, "x": 31.870479161686401, "y": 31.412937760577201, "name": "مستشفى الطلبه", "rate": 5.0, "address": "Shata, Damietta Desert, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.870479161686401, 31.412937760577201 ] } }
+]
+}

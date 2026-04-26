@@ -1,0 +1,16 @@
+{
+"type": "FeatureCollection",
+"name": "خدمات انشات موخرا مهمه",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "X": 31.8614620271, "Y": 31.413638861599999, "NAME": "المحكمه الابتدائيه" }, "geometry": { "type": "Point", "coordinates": [ 31.861462027000073, 31.413638862000028 ] } },
+{ "type": "Feature", "properties": { "X": 31.8581897322, "Y": 31.414353048399999, "NAME": "ساحة الفحص الفني لمرور دمياط" }, "geometry": { "type": "Point", "coordinates": [ 31.858189732000028, 31.414353048000066 ] } },
+{ "type": "Feature", "properties": { "X": 31.8579858843, "Y": 31.4134374233, "NAME": "موقف شطا" }, "geometry": { "type": "Point", "coordinates": [ 31.857985884000072, 31.413437423000062 ] } },
+{ "type": "Feature", "properties": { "X": 31.8704222573, "Y": 31.411319284200001, "NAME": "مستشفى التأمين الصحي للطلبة بشطا" }, "geometry": { "type": "Point", "coordinates": [ 31.87042225700003, 31.411319284000058 ] } },
+{ "type": "Feature", "properties": { "X": 31.8607763919, "Y": 31.4138841308, "NAME": "مصلحة الاحوال المدنية بدمياط" }, "geometry": { "type": "Point", "coordinates": [ 31.860776392000048, 31.413884131000032 ] } },
+{ "type": "Feature", "properties": { "X": 31.8586618818, "Y": 31.413790816500001, "NAME": "مديرية التموين بدمياط" }, "geometry": { "type": "Point", "coordinates": [ 31.858661882000035, 31.413790817000063 ] } },
+{ "type": "Feature", "properties": { "X": 31.857530940899998, "Y": 31.414538663399998, "NAME": "إدارة الدفاع المدني" }, "geometry": { "type": "Point", "coordinates": [ 31.85753094100005, 31.41453866300003 ] } },
+{ "type": "Feature", "properties": { "X": 31.857362423200001, "Y": 31.414167936599998, "NAME": "الحمايه المدنيه" }, "geometry": { "type": "Point", "coordinates": [ 31.857362423000041, 31.414167937000059 ] } },
+{ "type": "Feature", "properties": { "X": 31.857954107499999, "Y": 31.413861127200001, "NAME": "المطافي" }, "geometry": { "type": "Point", "coordinates": [ 31.857954108000058, 31.413861127000075 ] } }
+]
+}

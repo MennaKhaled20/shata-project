@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "NationalSecurityCourt",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "number": 1, "x": 31.311923996131199, "y": 30.052437811700202, "name": "National Security Agency", "rate": 4.6, "address": " Ezbet El-Arab, Qesm Than Madinet Nasr, Cairo Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.311923996131199, 30.052437811700202 ] } },
+{ "type": "Feature", "properties": { "number": 2, "x": 31.861290363277799, "y": 31.413702955631202, "name": "Damietta Elementary Court", "rate": 4.1, "address": " طريق دمياط بورسعيد, Madinet Izbat Al Borg, Damietta, Damietta Governorate " }, "geometry": { "type": "Point", "coordinates": [ 31.861290363277799, 31.413702955631202 ] } }
+]
+}

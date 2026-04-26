@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>شطا ريال إستيت هب | منصة التحليل العمراني الذكية</title>
+    <!-- Bootstrap 5 RTL + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Leaflet + Plugins -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- chartjs-plugin-datalabels لإظهار الأرقام والنسب -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: radial-gradient(circle at 10% 30%, #0f0c29, #1a1838, #24243e);
+            font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff4d6d, #ff85a2); border-radius: 10px; }
+
+        .glass-panel {
+            background: rgba(20, 15, 45, 0.45);
+            backdrop-filter: blur(14px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 133, 162, 0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .premium-header {
+            background: linear-gradient(135deg, rgba(255,77,109,0.2), rgba(255,133,162,0.1));
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,194,209,0.5);
+            border-radius: 0 0 30px 30px;
+            margin: 15px 25px 0 25px;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-group img {
+            height: 55px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+            background: rgba(255,255,255,0.15);
+            padding: 5px;
+            border-radius: 16px;
+            transition: transform 0.2s;
+        }
+        .logo-group img:hover {
+            transform: scale(1.02);
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, #fff, #ffc2d1, #ff85a2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        .badge-premium {
+            
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            margin-right: 12px;
+        }
+        .sidebar-premium {
+            padding: 20px;
+            height: calc(100vh - 130px);
+            overflow-y: auto;
+        }
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffc2d1;
+            margin-bottom: 12px;
+            border-right: 3px solid #ff4d6d;
+            padding-right: 10px;
+        }
+        .form-control, .form-range {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,133,162,0.3);
+            color: white;
+            border-radius: 28px;
+        }
+        .layer-check {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .layer-check input { accent-color: #ff4d6d; width: 18px; height: 18px; }
+        .info-card-glass, .ai-card {
+            background: rgba(0,0,0,0.55);
+            border-radius: 24px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(255,133,162,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .card-header-glow {
+            font-weight: 700;
+            background: linear-gradient(90deg, #ff4d6d, #ff85a2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+        .map-card-glass {
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 32px;
+            overflow: hidden;
+            height: 100%;
+        }
+        #map, #storyMap, #leftMap, #rightMap {
+            height: 100%;
+            width: 100%;
+            border-radius: 24px;
+            z-index: 1;
+        }
+        .map-toolbar {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+        }
+        .btn-glow {
+            background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+            border: none;
+            border-radius: 50px;
+            padding: 6px 18px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255,77,109,0.4);
+        }
+        .btn-outline-glow {
+            background: rgba(255,77,109,0.2);
+            border: 1px solid #ff85a2;
+            color: #ffc2d1;
+            border-radius: 50px;
+            padding: 6px 18px;
+            backdrop-filter: blur(4px);
+        }
+        .story-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,133,162,0.3);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .story-tab-btn {
+            background: rgba(20,15,45,0.7);
+            border: none;
+            border-radius: 40px;
+            padding: 8px 24px;
+            color: #ffc2d1;
+            transition: 0.2s;
+        }
+        .story-tab-btn.active {
+            background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+            color: white;
+            box-shadow: 0 0 10px #ff4d6d;
+        }
+        .timeline-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+        .year-btn {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #ff85a2;
+            border-radius: 50px;
+            padding: 5px 18px;
+            color: #ffc2d1;
+        }
+        .year-btn.active, .year-btn:hover { background: #ff4d6d; color: white; }
+        .story-gallery { max-height: 65vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .story-card {
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 10px;
+            display: flex;
+            gap: 12px;
+            border: 1px solid rgba(255,133,162,0.4);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .story-card:hover { background: rgba(255,77,109,0.2); transform: scale(0.99);}
+        .story-card img { width: 90px; height: 90px; object-fit: cover; border-radius: 16px; border: 1px solid #ff85a2; background: #1a1a2e; }
+        .btn-sm-pink { background: #ff4d6d; border: none; border-radius: 40px; padding: 4px 12px; font-size: 0.7rem; color: white; }
+        /* تصغير حجم المخططات قليلاً */
+        .charts-footer .chart-panel {
+            padding: 12px 10px;
+            margin-bottom: 16px;
+        }
+        .charts-footer canvas {
+            max-height: 170px !important;
+            width: 100% !important;
+        }
+        .swipe-container { position: relative; }
+        #swipeMap { position: relative; height: 58vh; }
+        #leftMap, #rightMap { position: absolute; top: 0; height: 100%; z-index: 1; }
+        #leftMap { left: 0; width: 50%; }
+        #rightMap { right: 0; width: 50%; }
+        #swipeHandle { position: absolute; left: 50%; width: 5px; height: 100%; background: #ff4d6d; z-index: 2; cursor: ew-resize; transform: translateX(-50%); }
+        @media (max-width: 992px) {
+            .title { font-size: 1.2rem; }
+            .sidebar-premium { height: auto; }
+            #map, #storyMap { height: 50vh; }
+            .logo-group img { height: 45px; }
+        }
+        .leaflet-popup-content-wrapper { background: rgba(20,15,45,0.9); backdrop-filter: blur(8px); border-radius: 20px; color: white; border: 1px solid #ff85a2; }
+        .custom-div-icon i { font-size: 20px; text-shadow: 0 0 5px black; }
+        .feature-detail-row {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            word-break: break-word;
+            border-right: 2px solid #ff85a2;
+            transition: all 0.2s;
+        }
+        .feature-detail-row:hover {
+            background: rgba(255, 77, 109, 0.25);
+            transform: translateX(-5px);
+        }
+        .feature-detail-row i { width: 28px; color: #ff85a2; font-size: 1.1rem; }
+        .feature-title { font-weight: bold; color: #ffc2d1; margin-left: 8px; }
+        .feature-value { color: #ffffff; font-weight: 500; }
+        .status-msg {
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid px-3">
+    <div class="premium-header">
+        <!-- الشعارات على اليمين (الجامعة + القسم) -->
+        <div class="logo-group">
+            <img src="universitylogo.jpg" alt="شعار الجامعة" onerror="this.onerror=null; this.src='https://via.placeholder.com/120x55?text=University+Logo';">
+            <img src="deptlogo.jpg" alt="شعار القسم" onerror="this.onerror=null; this.src='https://via.placeholder.com/120x55?text=Dept+Logo';">
+        </div>
+        <div class="text-center">
+            <i class="fas fa-chart-line fa-2x" style="color:#ff85a2"></i>
+            <h2 class="title d-inline-block mx-2">Shata Real Estate Hub <span class="badge-premium">AI Smart City Platform</span></h2>
+            <i class="fas fa-microchip fa-2x" style="color:#ffc2d1"></i>
+        </div>
+        <div class="logo-group" style="justify-content: flex-end;">
+            <!-- يمكن وضع أيقونات أو شعارات إضافية هنا (مثل شعار المدينة) -->
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-3 col-md-4">
+            <div class="glass-panel sidebar-premium">
+                <div class="filter-title"><i class="fas fa-search"></i> بحث سريع</div>
+                <input type="text" id="searchInput" class="form-control mb-3" placeholder="اسم المنطقة أو الخدمة...">
+                <div class="filter-title"><i class="fas fa-tag"></i> فلتر أسعار الأراضي (جنيه)</div>
+                <div class="price-range-wrap mb-3">
+                    <input type="range" id="priceSlider" class="form-range" min="0" max="1000000" step="10000" value="600000">
+                    <div class="d-flex justify-content-between mt-1">
+                        <span id="minPriceLabel">0</span>
+                        <span id="maxPriceLabel">1,000,000+</span>
+                    </div>
+                    <div class="text-center mt-2" id="priceFilterInfo">عرض جميع العقارات</div>
+                </div>
+                <div class="filter-title"><i class="fas fa-layer-group"></i> الطبقات التفاعلية</div>
+                <div id="layersControl" class="mb-3"></div>
+                <div class="filter-title"><i class="fas fa-city"></i> التطور العمراني (سلايدر)</div>
+                <input type="range" id="timeSlider" class="form-range" min="1996" max="2026" step="10" value="2026">
+                <div class="text-center mt-1" id="timeValue">العمران 2026 (الحاضر)</div>
+                <div class="info-card-glass">
+                    <div class="card-header-glow"><i class="fas fa-map-marker-alt"></i> تفاصيل الموقع</div>
+                    <div id="featureContent" class="small">✨ اضغط على أي عنصر في الخريطة لعرض جميع التفاصيل</div>
+                </div>
+                <div class="ai-card">
+                    <div class="card-header-glow"><i class="fas fa-brain"></i> توصيات الذكاء الاصطناعي</div>
+                    <div id="aiRecommendations" class="small">جاري تحليل البيانات...</div>
+                </div>
+                <div id="loadStatus" class="status-msg" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-md-8">
+            <div class="map-card-glass" style="height: calc(100vh - 130px); position: relative;">
+                <div id="map"></div>
+                <div class="map-toolbar">
+                    <button id="heatmapToggleBtn" class="btn-outline-glow"><i class="fas fa-fire"></i> خريطة حرارة الأسعار</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-panel p-3 mt-4">
+        <div class="story-tabs">
+            <button class="story-tab-btn active" data-tab="mapMode"><i class="fas fa-map"></i> وضع الخريطة الزمنية</button>
+            <button class="story-tab-btn" data-tab="swipeMode"><i class="fas fa-arrows-alt-h"></i> مقارنة انزلاقية (Swipe)</button>
+            <button class="story-tab-btn" data-tab="galleryMode"><i class="fas fa-images"></i> معرض القصة </button>
+        </div>
+        <div id="mapModeTab" class="tab-content active">
+            <div class="timeline-buttons" id="timelineButtons"></div>
+            <div class="map-card-glass" style="height: 58vh; position: relative;">
+                <div id="storyMap"></div>
+            </div>
+            <div id="yearInsight" class="mt-2 text-center bg-dark bg-opacity-25 rounded-pill p-2">✨ اختر سنة لرؤية التحليل والصورة التاريخية</div>
+        </div>
+        <div id="swipeModeTab" class="tab-content" style="display: none;">
+            <div class="swipe-container">
+                <p class="text-center"><i class="fas fa-arrows-alt-h"></i> اسحب الشريط للمقارنة بين 1996 و 2026</p>
+                <div id="swipeMap"><div id="leftMap"></div><div id="rightMap"></div><div id="swipeHandle"></div></div>
+            </div>
+        </div>
+        <div id="galleryModeTab" class="tab-content" style="display: none;">
+            <div id="storyGalleryContainer" class="story-gallery"></div>
+        </div>
+    </div>
+
+    <!-- مخططات محسنة: 6 مخططات مع الأرقام والنسب -->
+    <div class="row charts-footer g-3">
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-chart-pie"></i> الحالة الإنشائية (نسبة)</div>
+                <canvas id="pieChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-chart-bar"></i> مقارنة الأسعار (ج.م)</div>
+                <canvas id="barChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-chart-line"></i> تطور أسعار الأراضي</div>
+                <canvas id="lineChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-chart-pie"></i> توزيع الخدمات</div>
+                <canvas id="doughnutChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-chart-radar"></i> كثافة الخدمات لكل فئة</div>
+                <canvas id="radarChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-panel glass-panel">
+                <div class="text-center fw-bold mb-1"><i class="fas fa-tachometer-alt"></i> مؤشر متوسط السعر</div>
+                <canvas id="gaugeChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ------------------------ التهيئة العامة -------------------------
+    const IMAGE_BASE_PATH = "images/";
+    // صور السنوات الأربع: img (1).jpg , img (2).jpg , img (3).jpg , img (4).jpg
+    const urbanYears = [
+        { year: 1996, image: "img (1).jpg", bounds: [[31.38, 31.82], [31.44, 31.90]], insight: "بداية التوسع العمراني - مناطق متفرقة ونمو بطيء" },
+        { year: 2006, image: "img (2).jpg", bounds: [[31.38, 31.82], [31.44, 31.90]], insight: "إنشاء أولى المجمعات السكنية وامتداد نحو منطقة المحاكم" },
+        { year: 2016, image: "img (3).jpg", bounds: [[31.38, 31.82], [31.44, 31.90]], insight: "طفرة عمرانية بفضل مدينة الأثاث والطرق الجديدة" },
+        { year: 2026, image: "img (4).jpg", bounds: [[31.38, 31.82], [31.44, 31.90]], insight: "مدينة ذكية متكاملة - خطط التوسع المستقبلية" }
+    ];
+    // إنشاء 39 صورة بالاسم img (i).jpg
+    const storyImages = [];
+    for (let i = 1; i <= 39; i++) {
+        let year = 1996 + (Math.floor((i-1)/13) * 10);
+        if (year > 2026) year = 2026;
+        storyImages.push({ 
+            id: i, 
+            title: `وثيقة عمرانية رقم ${i}`, 
+            year: year, 
+            description: `صورة جوية أو أرضية توضح تطور منطقة شطا في مرحلة ${year}.`,
+            imageUrl: `${IMAGE_BASE_PATH}img (${i}).jpg`
+        });
+    }
+
+    // ------------------------ الخريطة الرئيسية -------------------------
+    let mainMap = L.map('map').setView([31.412, 31.865], 15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB & OSM' }).addTo(mainMap);
+
+    const layerGroups = {
+        services: L.layerGroup().addTo(mainMap),
+        prices: L.layerGroup().addTo(mainMap),
+        construction: L.layerGroup().addTo(mainMap),
+        roads: L.layerGroup().addTo(mainMap),
+        urban1996: L.layerGroup(),
+        urban2006: L.layerGroup(),
+        urban2016: L.layerGroup(),
+        urban2026: L.layerGroup(),
+        studyArea: L.layerGroup(),
+        heatLayer: null
+    };
+    let allPricePoints = [];
+    let currentPriceCluster = null;
+    let activeHeatmap = false;
+    let pieChart, barChart, lineChart, doughnutChart, radarChart, gaugeChart;
+    let loadedCount = 0, failedCount = 0;
+
+    // إحصائيات الخدمات للمخطط الدائري المجوف والرادار
+    let servicesStats = { cafes:0, factories:0, hospitals:0, mosques:0, schools:0, pharmacies:0, others:0 };
+
+    // أيقونات مميزة
+    const iconCafe = L.divIcon({ html: '<i class="fas fa-mug-hot" style="color:#ffb347; font-size:22px;"></i>', iconSize: [22,22], className: 'custom-div-icon' });
+    const iconFactory = L.divIcon({ html: '<i class="fas fa-industry" style="color:#ff8c42; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconHospital = L.divIcon({ html: '<i class="fas fa-hospital" style="color:#ff4d6d; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconMosque = L.divIcon({ html: '<i class="fas fa-mosque" style="color:#4caf50; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconSchool = L.divIcon({ html: '<i class="fas fa-school" style="color:#ffc2d1; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconPrice = L.divIcon({ html: '<i class="fas fa-dollar-sign" style="color:#ffd966; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconDefault = L.divIcon({ html: '<i class="fas fa-building" style="color:#ff85a2; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconPharmacy = L.divIcon({ html: '<i class="fas fa-capsules" style="color:#4db6ac; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconCourt = L.divIcon({ html: '<i class="fas fa-gavel" style="color:#b39ddb; font-size:22px;"></i>', iconSize: [22,22] });
+    const iconSupermarket = L.divIcon({ html: '<i class="fas fa-shopping-basket" style="color:#ffb74d; font-size:22px;"></i>', iconSize: [22,22] });
+
+    function showFeatureInfo(feature, customFields = null, typeHint = '') {
+        const container = document.getElementById('featureContent');
+        if (!feature || !feature.properties) {
+            container.innerHTML = '<div class="text-muted">⚠️ لا توجد تفاصيل متاحة لهذا العنصر</div>';
+            return;
+        }
+        let html = '<div>';
+        const props = feature.properties;
+        let keys = customFields && customFields.length ? customFields : Object.keys(props);
+        for (let key of keys) {
+            let value = props[key];
+            if (value === undefined || value === null || value === "") value = "غير متوفر";
+            if (typeof value === 'number' && key.toLowerCase().includes('price')) value = value.toLocaleString() + " ج.م";
+            html += `<div class="feature-detail-row">
+                        <i class="fas fa-info-circle"></i>
+                        <span><span class="feature-title">${key}:</span> <span class="feature-value">${value}</span></span>
+                     </div>`;
+        }
+        if (typeHint === 'سعر' || props.price) html += `<div class="feature-detail-row"><i class="fas fa-coins"></i><span class="feature-value">💰 قيمة عقارية تقديرية</span></div>`;
+        else if (props.bld) html += `<div class="feature-detail-row"><i class="fas fa-hard-hat"></i><span class="feature-value">🏗️ حالة البناء: ${props.bld}</span></div>`;
+        else if (props.name && (props.name.includes('مطعم') || props.name.includes('كافيه'))) html += `<div class="feature-detail-row"><i class="fas fa-utensils"></i><span class="feature-value">🍽️ وجهة طعام وخدمات</span></div>`;
+        container.innerHTML = html;
+    }
+
+    function addLayerToggle(name, groupKey) {
+        const container = document.getElementById('layersControl');
+        const div = document.createElement('div');
+        div.className = 'layer-check';
+        div.innerHTML = `<input type="checkbox" id="toggle_${groupKey}" checked><label for="toggle_${groupKey}">${name}</label>`;
+        container.appendChild(div);
+        document.getElementById(`toggle_${groupKey}`).addEventListener('change', (e) => {
+            if (e.target.checked) mainMap.addLayer(layerGroups[groupKey]);
+            else mainMap.removeLayer(layerGroups[groupKey]);
+            refreshCharts();
+        });
+    }
+
+    // قائمة ملفات GeoJSON كاملة
+    const geoJsonFiles = [
+        { name: 'مقاهي ومطاعم', file: 'geojson/Cafes and restaurants.geojson', group: 'services', icon: iconCafe, isPoint: true, fields: ['name', 'rate', 'address'], typeHint: 'خدمات', serviceType: 'cafes' },
+        { name: 'مصانع', file: 'geojson/factories.geojson', group: 'services', icon: iconFactory, isPoint: true, fields: ['name', 'rate', 'address'], typeHint: 'صناعة', serviceType: 'factories' },
+        { name: 'مستشفيات', file: 'geojson/hospitals.geojson', group: 'services', icon: iconHospital, isPoint: true, fields: ['name', 'rate', 'address'], typeHint: 'صحة', serviceType: 'hospitals' },
+        { name: 'مساجد', file: 'geojson/mosques.geojson', group: 'services', icon: iconMosque, isPoint: true, fields: ['name', 'rate', 'address'], typeHint: 'ديني', serviceType: 'mosques' },
+        { name: 'محاكم', file: 'geojson/NationalSecurityCourt.geojson', group: 'services', icon: iconCourt, isPoint: true, fields: ['name', 'rate'], typeHint: 'حكومي', serviceType: 'others' },
+        { name: 'صيدليات', file: 'geojson/pharmacies.geojson', group: 'services', icon: iconPharmacy, isPoint: true, fields: ['name', 'rate'], typeHint: 'صيدلية', serviceType: 'pharmacies' },
+        { name: 'مدارس', file: 'geojson/schools.geojson', group: 'services', icon: iconSchool, isPoint: true, fields: ['name', 'rate'], typeHint: 'تعليم', serviceType: 'schools' },
+        { name: 'سوبر ماركت', file: 'geojson/supermarkets.geojson', group: 'services', icon: iconSupermarket, isPoint: true, fields: ['name', 'rate'], typeHint: 'تجاري', serviceType: 'others' },
+        { name: 'أسعار الأراضي', file: 'geojson/اسعار الاراضي.geojson', group: 'prices', icon: iconPrice, isPoint: true, fields: ['name', 'price', 'details'], isPrice: true, typeHint: 'سعر' },
+        { name: 'أسعار جديدة', file: 'geojson/الاسعارالجديده.geojson', group: 'prices', icon: iconPrice, isPoint: true, fields: ['name', 'price', 'details'], isPrice: true, typeHint: 'سعر' },
+        { name: 'الحالة الإنشائية', file: 'geojson/الحاله الانشائيه.geojson', group: 'construction', isPolygon: true, fields: ['bld'], typeHint: 'انشاء' },
+        { name: 'الطرق', file: 'geojson/الطريق.geojson', group: 'roads', isLine: true, fields: ['name', 'النسب'], typeHint: 'طريق' },
+        { name: 'خدمات حديثة', file: 'geojson/خدمات انشات موخرا مهمه.geojson', group: 'services', icon: iconDefault, isPoint: true, fields: ['NAME'], typeHint: 'خدمة', serviceType: 'others' },
+        { name: 'عدد الأدوار', file: 'geojson/عدد الادوار.geojson', group: 'construction', isPolygon: true, fields: ['عددال'], typeHint: 'مبنى' },
+        { name: 'عمران 1996', file: 'geojson/عمران1996.geojson', group: 'urban1996', isPolygon: true, style: { color: '#ffaa66', weight: 1.5, fillOpacity: 0.2 }, fields: ['gridcode', 'مساحة'], typeHint: 'عمران' },
+        { name: 'عمران 2006', file: 'geojson/عمران2006.geojson', group: 'urban2006', isPolygon: true, style: { color: '#ff8866', weight: 1.5, fillOpacity: 0.2 }, fields: ['gridcode', 'مساحة'], typeHint: 'عمران' },
+        { name: 'عمران 2016', file: 'geojson/عمران2016.geojson', group: 'urban2016', isPolygon: true, style: { color: '#ff6688', weight: 1.5, fillOpacity: 0.2 }, fields: ['gridcode', 'year', 'مساحه'], typeHint: 'عمران' },
+        { name: 'عمران 2026', file: 'geojson/عمران2026.geojson', group: 'urban2026', isPolygon: true, style: { color: '#ff4d6d', weight: 2, fillOpacity: 0.35 }, fields: ['gridcode', 'year', 'مساحة'], typeHint: 'عمران' },
+        { name: 'منطقة الدراسة', file: 'geojson/منطقه الدراسة.geojson', group: 'studyArea', isPolygon: true, style: { color: '#ffffff', weight: 3, fillOpacity: 0.05, dashArray: '6,6' }, fields: ['مساحه'], typeHint: 'حدود' }
+    ];
+
+    function loadGeoJSON(config) {
+        fetch(config.file)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                loadedCount++;
+                let layer;
+                const commonOnEach = (feature, leafletLayer) => {
+                    let popupText = '<div class="fw-bold">📍 معلومات</div>';
+                    if (config.fields) config.fields.forEach(f => popupText += `<b>${f}:</b> ${feature.properties[f] || '?'}<br>`);
+                    leafletLayer.bindPopup(popupText);
+                    leafletLayer.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        const allFields = config.fields || Object.keys(feature.properties);
+                        showFeatureInfo(feature, allFields, config.typeHint);
+                    });
+                };
+                if (config.isPolygon || config.isLine) {
+                    layer = L.geoJSON(data, {
+                        style: config.style || { color: '#ff85a2', weight: 2, fillOpacity: 0.2 },
+                        onEachFeature: commonOnEach
+                    });
+                } else {
+                    const cluster = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 50 });
+                    L.geoJSON(data, {
+                        pointToLayer: (feat, latlng) => L.marker(latlng, { icon: config.icon || iconDefault }),
+                        onEachFeature: (feat, marker) => {
+                            let popupHtml = '<div class="fw-bold">📍 معلومات</div>';
+                            if (config.fields) config.fields.forEach(f => popupHtml += `<b>${f}:</b> ${feat.properties[f] || '?'}<br>`);
+                            marker.bindPopup(popupHtml);
+                            marker.on('click', () => {
+                                const allFields = config.fields || Object.keys(feat.properties);
+                                showFeatureInfo(feat, allFields, config.typeHint);
+                            });
+                            if (config.isPrice) {
+                                const price = parseFloat(feat.properties.price) || 0;
+                                allPricePoints.push({ latlng: marker.getLatLng(), price: price, feature: feat });
+                            }
+                            if (config.serviceType && config.serviceType !== 'others') {
+                                servicesStats[config.serviceType] = (servicesStats[config.serviceType] || 0) + 1;
+                            } else if (config.serviceType === 'others') {
+                                servicesStats.others = (servicesStats.others || 0) + 1;
+                            }
+                        }
+                    }).addTo(cluster);
+                    layer = cluster;
+                }
+                layerGroups[config.group].addLayer(layer);
+                if (config.isPrice) {
+                    currentPriceCluster = layer;
+                    refreshPriceFilter(parseInt(document.getElementById('priceSlider').value));
+                }
+                addLayerToggle(config.name, config.group);
+                if (config.group === 'construction') refreshCharts();
+                if (config.group === 'prices') generateAI();
+                updateLoadStatus();
+                refreshAllCharts();
+            })
+            .catch(err => {
+                failedCount++;
+                console.warn(`⚠️ فشل تحميل ${config.file}`, err);
+                updateLoadStatus();
+            });
+    }
+
+    function updateLoadStatus() {
+        const total = geoJsonFiles.length;
+        const statusDiv = document.getElementById('loadStatus');
+        if (failedCount > 0) {
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> تم تحميل ${loadedCount} من ${total} ملف. ${failedCount} ملف فشل (تحقق من وجود الملفات في مسار "geojson/")`;
+        } else if (loadedCount === total) {
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> تم تحميل جميع ملفات البيانات بنجاح (${total}) - اضغط على أي عنصر لرؤية التفاصيل`;
+            setTimeout(() => statusDiv.style.opacity = '0.7', 4000);
+        } else {
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> جاري تحميل البيانات... ${loadedCount}/${total}`;
+        }
+    }
+
+    geoJsonFiles.forEach(f => loadGeoJSON(f));
+
+    // فلتر الأسعار
+    const priceSlider = document.getElementById('priceSlider');
+    const maxPriceLabel = document.getElementById('maxPriceLabel');
+    const priceFilterInfo = document.getElementById('priceFilterInfo');
+    function refreshPriceFilter(maxPrice) {
+        if (!currentPriceCluster) return;
+        mainMap.removeLayer(currentPriceCluster);
+        const newCluster = L.markerClusterGroup({ chunkedLoading: true });
+        let count = 0;
+        allPricePoints.forEach(p => {
+            if (p.price <= maxPrice) {
+                const marker = L.marker(p.latlng, { icon: iconPrice });
+                marker.bindPopup(`<b>السعر:</b> ${p.price.toLocaleString()} ج.م<br><b>${p.feature.properties.name || 'أرض'}</b>`);
+                marker.on('click', () => showFeatureInfo(p.feature, ['name', 'price', 'details'], 'سعر'));
+                newCluster.addLayer(marker);
+                count++;
+            }
+        });
+        currentPriceCluster = newCluster;
+        mainMap.addLayer(currentPriceCluster);
+        priceFilterInfo.innerText = `🏷️ عرض ${count} عقار ≤ ${maxPrice.toLocaleString()} ج.م`;
+    }
+    priceSlider.addEventListener('input', (e) => {
+        let val = parseInt(e.target.value);
+        maxPriceLabel.innerText = val.toLocaleString() + '+';
+        refreshPriceFilter(val);
+    });
+
+    const timeSliderCtrl = document.getElementById('timeSlider');
+    const timeValueSpan = document.getElementById('timeValue');
+    const urbanGroups = {1996:'urban1996',2006:'urban2006',2016:'urban2016',2026:'urban2026'};
+    function showUrbanLayer(year) {
+        Object.values(urbanGroups).forEach(g => mainMap.removeLayer(layerGroups[g]));
+        mainMap.addLayer(layerGroups[urbanGroups[year]]);
+        timeValueSpan.innerText = `العمران ${year} (${year === 2026 ? 'توقعات' : 'بيانات تاريخية'})`;
+    }
+    timeSliderCtrl.addEventListener('input', (e) => showUrbanLayer(parseInt(e.target.value)));
+    setTimeout(() => showUrbanLayer(2026), 2000);
+
+    const heatBtn = document.getElementById('heatmapToggleBtn');
+    heatBtn.addEventListener('click', () => {
+        if (activeHeatmap) {
+            if (layerGroups.heatLayer) mainMap.removeLayer(layerGroups.heatLayer);
+            activeHeatmap = false;
+            heatBtn.classList.remove('active');
+            heatBtn.style.background = 'rgba(255,77,109,0.2)';
+        } else {
+            const heatPoints = allPricePoints.map(p => [p.latlng.lat, p.latlng.lng, Math.min(p.price / 80000, 1)]);
+            layerGroups.heatLayer = L.heatLayer(heatPoints, { radius: 30, blur: 20, maxZoom: 17 });
+            mainMap.addLayer(layerGroups.heatLayer);
+            activeHeatmap = true;
+            heatBtn.classList.add('active');
+            heatBtn.style.background = 'linear-gradient(135deg, #ff4d6d, #ff85a2)';
+        }
+    });
+
+    // تكوين عام لمكتبة datalabels لإظهار الأرقام والنسب
+    Chart.defaults.set('plugins.datalabels', {
+        color: '#fff',
+        anchor: 'end',
+        align: 'top',
+        offset: 4,
+        font: { weight: 'bold', size: 11 },
+        formatter: (value, context) => {
+            if (context.chart.config.type === 'pie' || context.chart.config.type === 'doughnut') {
+                let total = context.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                let percentage = ((value / total) * 100).toFixed(1);
+                return `${percentage}%`;
+            } else {
+                return value;
+            }
+        }
+    });
+
+    async function refreshAllCharts() {
+        await refreshPieAndBar();
+        updateLineChart();
+        updateDoughnutChart();
+        updateRadarChart();
+        updateGaugeChart();
+    }
+
+    async function refreshPieAndBar() {
+        try {
+            const consRes = await fetch('geojson/الحاله الانشائيه.geojson');
+            const consData = await consRes.json();
+            let good=0, bad=0, under=0;
+            consData.features.forEach(f => {
+                const status = f.properties.bld;
+                if (status === 'جديد') good++;
+                else if (status === 'قديم') bad++;
+                else if (status === 'متوسط') under++;
+            });
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(document.getElementById('pieChart'), {
+                type: 'pie', data: { labels: ['جديد', 'قديم', 'متوسط'], datasets: [{ data: [good, bad, under], backgroundColor: ['#ff4d6d', '#ff85a2', '#ffc2d1'] }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { datalabels: { backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 12, padding: 3 }, legend: { labels: { color: '#fff' } } } }
+            });
+            const priceRes = await fetch('geojson/الاسعارالجديده.geojson');
+            const priceData = await priceRes.json();
+            let oldSum=0, oldCnt=0, furnSum=0, furnCnt=0;
+            priceData.features.forEach(f => {
+                let price = parseFloat(f.properties.price) || 0;
+                let name = (f.properties.name || '').toLowerCase();
+                if (name.includes('شطا القديمة')) { oldSum+=price; oldCnt++; }
+                if (name.includes('مدينة الأثاث')) { furnSum+=price; furnCnt++; }
+            });
+            const avgOld = oldCnt ? oldSum/oldCnt : 0;
+            const avgFurn = furnCnt ? furnSum/furnCnt : 0;
+            if (barChart) barChart.destroy();
+            barChart = new Chart(document.getElementById('barChart'), {
+                type: 'bar', data: { labels: ['شطا القديمة', 'مدينة الأثاث'], datasets: [{ label: 'متوسط السعر (جنيه)', data: [avgOld, avgFurn], backgroundColor: ['#ff4d6d', '#ffc2d1'] }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } }, plugins: { datalabels: { anchor: 'end', align: 'top', color: '#ffc2d1', font: { weight: 'bold' } }, legend: { labels: { color: '#fff' } } } }
+            });
+        } catch(e) { console.warn(e); }
+    }
+
+    function updateLineChart() {
+        if (allPricePoints.length === 0) return;
+        const prices = allPricePoints.map(p => p.price).sort((a,b)=>a-b);
+        const avgPrice = prices.reduce((a,b)=>a+b,0)/prices.length;
+        const years = [1996, 2006, 2016, 2026];
+        const simulatedPrices = years.map((y, idx) => Math.round(avgPrice * (1 + idx * 0.35) * (0.85 + Math.random() * 0.3)));
+        if (lineChart) lineChart.destroy();
+        lineChart = new Chart(document.getElementById('lineChart'), {
+            type: 'line', data: { labels: years, datasets: [{ label: 'متوسط سعر الأرض (جنيه)', data: simulatedPrices, borderColor: '#ff4d6d', backgroundColor: 'rgba(255,77,109,0.1)', borderWidth: 3, pointBackgroundColor: '#ff85a2', pointBorderColor: '#fff', tension: 0.3, fill: true }] },
+            options: { responsive: true, maintainAspectRatio: true, scales: { y: { ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } }, plugins: { datalabels: { align: 'top', offset: 6, color: '#fff' }, legend: { labels: { color: '#fff' } } } }
+        });
+    }
+
+    function updateDoughnutChart() {
+        const labels = ['مقاهي', 'مصانع', 'مستشفيات', 'مساجد', 'مدارس', 'صيدليات', 'أخرى'];
+        const data = [ servicesStats.cafes||0, servicesStats.factories||0, servicesStats.hospitals||0, servicesStats.mosques||0, servicesStats.schools||0, servicesStats.pharmacies||0, servicesStats.others||0 ];
+        if (doughnutChart) doughnutChart.destroy();
+        doughnutChart = new Chart(document.getElementById('doughnutChart'), {
+            type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: ['#ff4d6d','#ff85a2','#ffc2d1','#ffb347','#4db6ac','#b39ddb','#ff8c42'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { datalabels: { backgroundColor: '#000000aa', borderRadius: 12, padding: 4, formatter: (val,ctx) => { let total = data.reduce((a,b)=>a+b,0); let pct = ((val/total)*100).toFixed(1); return `${pct}%`; } }, legend: { labels: { color: '#fff' } } } }
+        });
+    }
+
+    function updateRadarChart() {
+        const categories = ['مقاهي', 'مصانع', 'مستشفيات', 'مساجد', 'مدارس', 'صيدليات'];
+        const values = [ servicesStats.cafes||0, servicesStats.factories||0, servicesStats.hospitals||0, servicesStats.mosques||0, servicesStats.schools||0, servicesStats.pharmacies||0 ];
+        if (radarChart) radarChart.destroy();
+        radarChart = new Chart(document.getElementById('radarChart'), {
+            type: 'radar', data: { labels: categories, datasets: [{ label: 'عدد الخدمات', data: values, backgroundColor: 'rgba(255,77,109,0.3)', borderColor: '#ff4d6d', pointBackgroundColor: '#ff85a2', pointBorderColor: '#fff' }] },
+            options: { responsive: true, maintainAspectRatio: true, scales: { r: { ticks: { color: '#fff', backdropColor: 'transparent' }, grid: { color: '#ff85a280' }, angleLines: { color: '#ff85a280' } } }, plugins: { datalabels: { align: 'end', color: '#ffc2d1', formatter: (val) => val } } }
+        });
+    }
+
+    function updateGaugeChart() {
+        if (allPricePoints.length === 0) return;
+        const avgPrice = allPricePoints.reduce((s,p)=>s+p.price,0)/allPricePoints.length;
+        const maxPrice = 1000000;
+        let percent = Math.min((avgPrice / maxPrice) * 100, 100);
+        if (gaugeChart) gaugeChart.destroy();
+        const ctx = document.getElementById('gaugeChart').getContext('2d');
+        gaugeChart = new Chart(ctx, {
+            type: 'doughnut', data: { datasets: [{ data: [percent, 100-percent], backgroundColor: ['#ff4d6d', '#2c2c54'], borderWidth: 0, circumference: 180, rotation: 270, cutout: '70%' }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: () => `متوسط السعر: ${Math.round(avgPrice).toLocaleString()} ج.م` } }, datalabels: { formatter: (val, ctx) => { if (ctx.dataIndex === 0) return `${Math.round(percent)}%`; return ''; }, color: '#fff', font: { size: 16, weight: 'bold' } } } }
+        });
+    }
+
+    function generateAI() {
+        if (allPricePoints.length === 0) return;
+        const sorted = [...allPricePoints].sort((a,b)=>b.price - a.price).slice(0,4);
+        let html = `<ul class="list-unstyled small">`;
+        sorted.forEach((p,idx)=> html += `<li><i class="fas fa-chart-line"></i> <strong>منطقة استثمار #${idx+1}</strong> : سعر ${p.price.toLocaleString()} ج - كثافة خدمات عالية</li>`);
+        html += `<li class="mt-2"><i class="fas fa-robot"></i> التوصية: التركيز على محيط الطريق الرئيسي (طريق بورسعيد) حيث النمو العمراني 2026.</li>`;
+        html += `<li><i class="fas fa-chart-simple"></i> المناطق القريبة من المدارس والمستشفيات تحقق عوائد مستقرة.</li></ul>`;
+        document.getElementById('aiRecommendations').innerHTML = html;
+    }
+    setTimeout(() => { refreshAllCharts(); generateAI(); }, 3000);
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        let q = e.target.value.toLowerCase().trim();
+        if (q.length < 2) return;
+        let found = false;
+        mainMap.eachLayer(layer => {
+            if (layer.getPopup && layer.getPopup()) {
+                let content = layer.getPopup().getContent();
+                if (content && content.toLowerCase().includes(q)) {
+                    layer.openPopup();
+                    if (layer.getLatLng) { mainMap.panTo(layer.getLatLng()); found = true; }
+                }
+            }
+        });
+        if (!found) alert("لم يتم العثور على نتائج مطابقة");
+    });
+
+    // ---------------------- القصة الزمنية ----------------------
+    let storyMainMap = null, currentImageOverlay = null;
+    function initStoryMap() {
+        if (storyMainMap) return;
+        storyMainMap = L.map('storyMap').setView([31.412, 31.865], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(storyMainMap);
+        buildTimeline();
+    }
+    function buildTimeline() {
+        const container = document.getElementById('timelineButtons');
+        container.innerHTML = '';
+        urbanYears.forEach(y => {
+            const btn = document.createElement('button');
+            btn.className = 'year-btn';
+            btn.innerText = y.year;
+            btn.onclick = () => {
+                document.querySelectorAll('#timelineButtons .year-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setYearOverlay(y.year);
+            };
+            container.appendChild(btn);
+        });
+        document.querySelector('#timelineButtons .year-btn').classList.add('active');
+        setYearOverlay(1996);
+    }
+    function setYearOverlay(year) {
+        if (currentImageOverlay && storyMainMap) storyMainMap.removeLayer(currentImageOverlay);
+        const yearData = urbanYears.find(y => y.year === year);
+        if (yearData && storyMainMap) {
+            const imgUrl = `${IMAGE_BASE_PATH}${yearData.image}`;
+            currentImageOverlay = L.imageOverlay(imgUrl, yearData.bounds, { opacity: 0.75 }).addTo(storyMainMap);
+            document.getElementById('yearInsight').innerHTML = `<strong>📍 ${year}</strong> : ${yearData.insight}<br><i class="fas fa-chart-line"></i> الصورة العلوية توضح نمو العمران.`;
+        } else {
+            document.getElementById('yearInsight').innerHTML = `⚠️ الصورة غير متوفرة للسنة ${year}، المسار: ${IMAGE_BASE_PATH}img (${year===1996?1:year===2006?2:year===2016?3:4}).jpg`;
+        }
+    }
+    let leftMap = null, rightMap = null;
+    function initSwipeMaps() {
+        if (leftMap) return;
+        leftMap = L.map('leftMap').setView([31.412, 31.865], 15);
+        rightMap = L.map('rightMap').setView([31.412, 31.865], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(leftMap);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(rightMap);
+        fetch('geojson/عمران1996.geojson').then(r=>r.json()).then(d=> L.geoJSON(d, { style: { color: '#ffaa66', weight: 2, fillOpacity: 0.3 } }).addTo(leftMap)).catch(e=>null);
+        fetch('geojson/عمران2026.geojson').then(r=>r.json()).then(d=> L.geoJSON(d, { style: { color: '#ff4d6d', weight: 2, fillOpacity: 0.4 } }).addTo(rightMap)).catch(e=>null);
+        const handle = document.getElementById('swipeHandle');
+        const container = document.getElementById('swipeMap');
+        let dragging = false;
+        handle.addEventListener('mousedown', () => dragging = true);
+        window.addEventListener('mouseup', () => dragging = false);
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            let rect = container.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let percent = Math.min(Math.max(x / rect.width * 100, 5), 95);
+            handle.style.left = percent + '%';
+            document.getElementById('leftMap').style.width = percent + '%';
+            document.getElementById('rightMap').style.width = (100 - percent) + '%';
+            leftMap.invalidateSize(); rightMap.invalidateSize();
+        });
+    }
+    function buildStoryGallery() {
+        const gallery = document.getElementById('storyGalleryContainer');
+        gallery.innerHTML = '';
+        storyImages.forEach(img => {
+            const card = document.createElement('div');
+            card.className = 'story-card';
+            card.innerHTML = `
+                <img src="${img.imageUrl}" alt="صورة ${img.id}" onerror="this.src='https://via.placeholder.com/90?text=صورة+غير+موجودة'">
+                <div class="flex-grow-1"><h6 class="mb-1">${img.title} - سنة ${img.year}</h6><p class="small mb-1">${img.description}</p><button class="btn-sm-pink view-story-btn" data-year="${img.year}"><i class="fas fa-map-marked-alt"></i> عرض على الخريطة الزمنية</button></div>
+            `;
+            gallery.appendChild(card);
+        });
+        document.querySelectorAll('.view-story-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const year = parseInt(btn.getAttribute('data-year'));
+                document.querySelector('.story-tab-btn[data-tab="mapMode"]').click();
+                setTimeout(() => {
+                    const yearBtns = document.querySelectorAll('#timelineButtons .year-btn');
+                    yearBtns.forEach(yb => { if(parseInt(yb.innerText) === year) yb.click(); });
+                    if (storyMainMap) storyMainMap.setView([31.412, 31.865], 15);
+                }, 200);
+            });
+        });
+    }
+    function switchTab(tabId) {
+        document.getElementById('mapModeTab').style.display = 'none';
+        document.getElementById('swipeModeTab').style.display = 'none';
+        document.getElementById('galleryModeTab').style.display = 'none';
+        if (tabId === 'mapMode') { document.getElementById('mapModeTab').style.display = 'block'; initStoryMap(); }
+        else if (tabId === 'swipeMode') { document.getElementById('swipeModeTab').style.display = 'block'; initSwipeMaps(); setTimeout(() => { if(leftMap) { leftMap.invalidateSize(); rightMap.invalidateSize(); } }, 100); }
+        else if (tabId === 'galleryMode') { document.getElementById('galleryModeTab').style.display = 'block'; buildStoryGallery(); }
+    }
+    document.querySelectorAll('.story-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.story-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            switchTab(btn.getAttribute('data-tab'));
+        });
+    });
+    initStoryMap();
+    console.log("✅ شطا ريال إستيت هب | جميع البيانات جاهزة - تم إضافة شعار الجامعة والقسم");
+</script>
+</body>
+</html>
+
